@@ -112,9 +112,9 @@ function execFx(command, options, processInitCallBack){
 function escapeArgs(args){
 	return args.map(s => {
 		if(/[^a-z0-9_\/:=-]/i.test(s)){
-			s = "'" + s.replace(/'/g, "'\\''") + "'";
-			s = s.replace(/^(?:'')+/g, '') // unduplicate single-quote at the beginning
-					.replace(/\\'''/g, "\\'" ); // remove non-escaped single-quote if there are enclosed between 2 escaped
+			s = '"' + s.replace(/"/g, '"\\""') + '"';
+			s = s.replace(/^(?:"")+/g, '') // unduplicate quote at the beginning
+					.replace(/\\"""/g, '\\"' ); // remove non-escaped quote if there are enclosed between 2 escaped
 		}
 		return s;
 	}).join(' ');
