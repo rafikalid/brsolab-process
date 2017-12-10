@@ -1,10 +1,15 @@
+/**
+ * BRSOLAB <contact@brsolab.com> (brsolab.com)
+ * MIT Licence.
+ */
 'use strict';
 
 const { spawn, exec }	= require('child_process');
 
 module.exports = {
 	spawn	: spawnFx,
-	exec	: execFx
+	exec	: execFx,
+	escape	: escapeArgs
 };
 
 const EMPTY_OBJ	= {};
@@ -51,10 +56,26 @@ function spawnFx(command, args, options, processInitCallBack){
 			// process response
 			prcess.stdout && prcess.stdout.on('data', d => { data	+= d.toString('utf8'); });
 			prcess.stderr && prcess.stderr.on('data', d => { error	+= d.toString('utf8'); });
-			prcess.on('error', err => { spawnError = err });
+			prcess.on('error', err => {
+				if(err.code === ''){
+					console.log('==== ino ERROR');
+				} else
+					spawnError = err
+			});
 			prcess.on('close', exitCode => {
-				if(exitCode)	reject({exitCode, error, spawnError, data, command, args});
-				else 		resolve(data);
+				if(exitCode){
+					// if windows bug with spawn
+					if(spawnError && spawnError.code === 'ENOENT'){
+						command	= command + ' ' + escapeArgs(args);
+						console.warn('BRSOLAB>> spawn fails, use exec instead: ', command);
+						resolve(execFx(command, options, processInitCallBack));
+					} else{
+						reject({exitCode, error, spawnError, data, command, args});
+					}
+				}
+				else{
+					resolve(data);
+				}
 			});
 			// user specified process init
 			if(processInitCallBack)
@@ -62,9 +83,8 @@ function spawnFx(command, args, options, processInitCallBack){
 		});
 }
 
-
+/** exec command, recommanded to use spawn instead */
 function execFx(command, options, processInitCallBack){
-	console.warn('EXEC>> exec command is vulnerable to argument escaping, recommanded to use "spawn" instead.')
 	var prcess, execError;
 	// init args
 		if(typeof options == 'function'){
@@ -86,4 +106,16 @@ function execFx(command, options, processInitCallBack){
 			if(processInitCallBack)
 				processInitCallBack.call(prcess, prcess);
 		});
+}
+
+/** escape arguments for exec command */
+function escapeArgs(args){
+	return args.map(s => {
+		if(/[^a-z0-9_\/:=-]/i.test(s)){
+			s = "'" + s.replace(/'/g, "'\\''") + "'";
+			s = s.replace(/^(?:'')+/g, '') // unduplicate single-quote at the beginning
+					.replace(/\\'''/g, "\\'" ); // remove non-escaped single-quote if there are enclosed between 2 escaped
+		}
+		return s;
+	}).join(' ');
 }

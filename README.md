@@ -2,12 +2,14 @@
 Wrapper for Nodejs Child process library 
 Uses the ES6 to make it simple the use of subprocess in nodeJS
 
-This library contains two functions: spawn & exec
-It's better to use spawn instead of exec when it's possible to avoid args escape problems
+This library contains 3 functions: spawn, exec, and escape
+spawn is used to create processes.
+exec is used to execute commandes via the system interpreter (SH, BATCH, MS-DOS, ...)
+escape is used to escape arguments to exec commande
 
 Those two functions use the some options as the original ones of nodejs. See the doc page at: https://nodejs.org/api/child_process.html
 
-# spawn
+## spawn
 ```javascript
 /**
  * spawn process
@@ -27,9 +29,12 @@ Those two functions use the some options as the original ones of nodejs. See the
  *         shell{boolean|string}: If true, runs command inside of a shell. Uses '/bin/sh' on UNIX, and process.env.ComSpec on Windows. A different shell can be specified as a string.
  * @return {Promise}
  */
+
+const {spawn} = require('brsolab-process');
+var list	= await spawn('ls', ['-l', '/home'], {timeout: 500});
 ```
 
-# exec
+## exec
 ```javascript
 /**
  * exec process
@@ -49,9 +54,13 @@ Those two functions use the some options as the original ones of nodejs. See the
  *         shell{boolean|string}: If true, runs command inside of a shell. Uses '/bin/sh' on UNIX, and process.env.ComSpec on Windows. A different shell can be specified as a string.
  * @return {Promise}
  */
+
+const {exec, escape} = require('brsolab-process');
+var list	= await exec('ls ' + escape(['-l', '/home']), {timeout: 500});
+await exec('ls ' + escape(['-l', '/home']) + ' > list.txt', {timeout: 500});
 ```
 
-# examples
+## examples
 ```javascript
 const { spawn, exec } = require('brsolab-process');
 const fs  = require('fs');
