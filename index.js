@@ -46,9 +46,9 @@ function spawnFx(command, args, options, processInitCallBack){
 					setTimeout(()=>{
 						try{
 							prcess.kill(9);
-							reject({error: 'process timeout', timeout: options.timeout, exitCode: -1});
+							reject({error: 'process timeout', timeout: options.timeout, exitCode: -1, command, args});
 						}catch(e){
-							reject({error: e, exitCode: -2});
+							reject({error: e, exitCode: -2, command, args});
 						}
 					}, options.timeout);
 			// process
