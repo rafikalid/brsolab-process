@@ -1,6 +1,6 @@
 {
   "name": "brsolab-process",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Nodejs Child Process wrapper with timeout and promises",
   "main": "index.js",
   "scripts": {
